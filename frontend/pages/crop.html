@@ -1,0 +1,446 @@
+<section class="crop-recommend fade-in">
+  <div class="container">
+    <h1>Crop Recommendation</h1>
+    <form class="crop-form" id="cropForm">
+     
+      <div class="form-group">
+        <label for="inputMode">Select Input Mode:</label>
+        <select id="inputMode" name="inputMode" required>
+          <option value="stateCity">State & City</option>
+          <option value="tempHumidity">Temperature & Humidity</option>
+        </select>
+      </div>
+
+      
+      <div class="form-group">
+        <label for="nitrogen">Nitrogen:</label>
+        <input type="number" id="nitrogen" name="nitrogen" required />
+      </div>
+      <div class="form-group">
+        <label for="phosphorous">Phosphorous:</label>
+        <input type="number" id="phosphorous" name="phosphorous" required />
+      </div>
+      <div class="form-group">
+        <label for="potassium">Potassium:</label>
+        <input type="number" id="potassium" name="potassium" required />
+      </div>
+      <div class="form-group">
+        <label for="ph">pH Level:</label>
+        <input type="number" step="0.1" id="ph" name="ph" required />
+      </div>
+      <div class="form-group">
+        <label for="rainfall">Rainfall (cm):</label>
+        <input type="number" step="0.1" id="rainfall" name="rainfall" required />
+      </div>
+
+      
+      <div id="stateCityFields">
+        <div class="form-group">
+          <label for="state">State:</label>
+          <select id="state" name="state">
+            <option value="">Select a state</option>
+            
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="city">City:</label>
+          <select id="city" name="city">
+            <option value="">Select a city</option>
+          </select>
+        </div>
+      </div>
+
+      
+      <div id="tempHumidityFields" style="display: none;">
+        <div class="form-group">
+          <label for="temperature">Temperature (°C):</label>
+          <input type="number" step="0.1" id="temperature" name="temperature" />
+        </div>
+        <div class="form-group">
+          <label for="humidity">Humidity (%):</label>
+          <input type="number" step="1" id="humidity" name="humidity" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn">Get Recommendation</button>
+    </form>
+
+    <div id="recommendation" class="recommendation" style="display: none">
+      <h2>Recommendation:</h2>
+      <p id="recommendationText"></p>
+    </div>
+  </div>
+</section>
+
+<style>
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden; 
+  }
+  .crop-recommend {
+    height: 100vh;
+    padding: 60px 0;
+    background-color: #f9f9f9; 
+    background-image: url("/frontend/images/farm_01.jpg"); 
+    background-size: cover;
+    background-position: center;
+  }
+
+  .crop-recommend h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    color: #4caf50; 
+  }
+
+  .crop-form {
+    max-height: 100vh;
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: "Arial", sans-serif;
+    background-image: url(""); 
+    background-repeat: no-repeat;
+    
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  .crop-form .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    background-color: #4caf50; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .crop-form .btn:hover {
+    background-color: #45a049;
+  }
+
+  .recommendation {
+    margin-top: 30px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .recommendation h2 {
+    color: #4caf50;
+    font-size: 1.8rem;
+  }
+
+  .recommendation p {
+    font-size: 1.2rem;
+    color: #333;
+  }
+</style>
+
+
+<script>
+  const stateCityMapping = {
+  "Andaman and Nicobar": [" Alipur "," Andaman Island "," Anderson Island "," Arainj-Laka-Punga "," Austinabad "," Bamboo Flat "," Barren Island "," Beadonabad "," Betapur "," Bindraban "," Bonington "," Brookesabad "," Cadell Point "," Calicut "," Chetamale "," Cinque Islands "," Defence Island "," Digilpur "," Dolyganj "," Flat Island "," Geinyale "," Great Coco Island "," Haddo "," Havelock Island "," Henry Lawrence Island "," Herbertabad "," Hobdaypur "," Ilichar "," Ingoie "," Inteview Island "," Jangli Ghat "," Jhon Lawrence Island "," Karen "," Kartara "," KYD Islannd "," Landfall Island "," Little Andmand "," Little Coco Island "," Long Island "," Maimyo "," Malappuram "," Manglutan "," Manpur "," Mitha Khari "," Neill Island "," Nicobar Island "," North Brother Island "," North Passage Island "," North Sentinel Island "," Nothen Reef Island "," Outram Island "," Pahlagaon "," Palalankwe "," Passage Island "," Phaiapong "," Phoenix Island "," Port Blair "," Preparis Island "," Protheroepur "," Rangachang "," Rongat "," Rutland Island "," Sabari "," Saddle Peak "," Shadipur "," Smith Island "," Sound Island "," South Sentinel Island "," Spike Island "," Tarmugli Island "," Taylerabad "," Titaije "," Toibalawe "," Tusonabad "," West Island "," Wimberleyganj "," Yadita"],
+  "Andhra Pradesh": [" Achampet "," Adilabad "," Adoni "," Alampur "," Allagadda "," Alur "," Amalapuram "," Amangallu "," Anakapalle "," Anantapur "," Andole "," Araku "," Armoor "," Asifabad "," Aswaraopet "," Atmakur "," B. Kothakota "," Badvel "," Banaganapalle "," Bandar "," Bangarupalem "," Banswada "," Bapatla "," Bellampalli "," Bhadrachalam "," Bhainsa "," Bheemunipatnam "," Bhimadole "," Bhimavaram "," Bhongir "," Bhooragamphad "," Boath "," Bobbili "," Bodhan "," Chandoor "," Chavitidibbalu "," Chejerla "," Chepurupalli "," Cherial "," Chevella "," Chinnor "," Chintalapudi "," Chintapalle "," Chirala "," Chittoor "," Chodavaram "," Cuddapah "," Cumbum "," Darsi "," Devarakonda "," Dharmavaram "," Dichpalli "," Divi "," Donakonda "," Dronachalam "," East Godavari "," Eluru "," Eturnagaram "," Gadwal "," Gajapathinagaram "," Gajwel "," Garladinne "," Giddalur "," Godavari "," Gooty "," Gudivada "," Gudur "," Guntur "," Hindupur "," Hunsabad "," Huzurabad "," Huzurnagar "," Hyderabad "," Ibrahimpatnam "," Jaggayyapet "," Jagtial "," Jammalamadugu "," Jangaon "," Jangareddygudem "," Jannaram "," Kadiri "," Kaikaluru "," Kakinada "," Kalwakurthy "," Kalyandurg "," Kamalapuram "," Kamareddy "," Kambadur "," Kanaganapalle "," Kandukuru "," Kanigiri "," Karimnagar "," Kavali "," Khammam "," Khanapur (AP) "," Kodangal "," Koduru "," Koilkuntla "," Kollapur "," Kothagudem "," Kovvur "," Krishna "," Krosuru "," Kuppam "," Kurnool "," Lakkireddipalli "," Madakasira "," Madanapalli "," Madhira "," Madnur "," Mahabubabad "," Mahabubnagar "," Mahadevapur "," Makthal "," Mancherial "," Mandapeta "," Mangalagiri "," Manthani "," Markapur "," Marturu "," Medachal "," Medak "," Medarmetla "," Metpalli "," Mriyalguda "," Mulug "," Mylavaram "," Nagarkurnool "," Nalgonda "," Nallacheruvu "," Nampalle "," Nandigama "," Nandikotkur "," Nandyal "," Narasampet "," Narasaraopet "," Narayanakhed "," Narayanpet "," Narsapur "," Narsipatnam "," Nazvidu "," Nelloe "," Nellore "," Nidamanur "," Nirmal "," Nizamabad "," Nuguru "," Ongole "," Outsarangapalle "," Paderu "," Pakala "," Palakonda "," Paland "," Palmaneru "," Pamuru "," Pargi "," Parkal "," Parvathipuram "," Pathapatnam "," Pattikonda "," Peapalle "," Peddapalli "," Peddapuram "," Penukonda "," Piduguralla "," Piler "," Pithapuram "," Podili "," Polavaram "," Prakasam "," Proddatur "," Pulivendla "," Punganur "," Putturu "," Rajahmundri "," Rajampeta "," Ramachandrapuram "," Ramannapet "," Rampachodavaram "," Rangareddy "," Rapur "," Rayachoti "," Rayadurg "," Razole "," Repalle "," Saluru "," Sangareddy "," Sathupalli "," Sattenapalle "," Satyavedu "," Shadnagar "," Siddavattam "," Siddipet "," Sileru "," Sircilla "," Sirpur Kagaznagar "," Sodam "," Sompeta "," Srikakulam "," Srikalahasthi "," Srisailam "," Srungavarapukota "," Sudhimalla "," Sullarpet "," Tadepalligudem "," Tadipatri "," Tanduru "," Tanuku "," Tekkali "," Tenali "," Thungaturthy "," Tirivuru "," Tirupathi "," Tuni "," Udaygiri "," Ulvapadu "," Uravakonda "," Utnor "," V.R. Puram "," Vaimpalli "," Vayalpad "," Venkatgiri "," Venkatgirikota "," Vijayawada "," Vikrabad "," Vinjamuru "," Vinukonda "," Visakhapatnam "," Vizayanagaram "," Vizianagaram "," Vuyyuru "," Wanaparthy "," Warangal "," Wardhannapet "," Yelamanchili "," Yelavaram "," Yeleswaram "," Yellandu "," Yellanuru "," Yellareddy "," Yerragondapalem "," Zahirabad "],
+  "Arunachal Pradesh": [
+    "Itanagar",
+    "Tawang",
+    "Bomdila",
+    "Ziro",
+    "Namsai",
+  ],
+  Assam: [
+    "Nalbari",
+    "Nagaon",
+    "Kamrup",
+    "Dhubri",
+    "Sonitpur",
+    "Cachar",
+    "Hailakandi",
+    "Goalpara",
+  ],
+  Bihar: [
+    "Patna",
+    "Gaya",
+    "Bhagalpur",
+    "Munger",
+    "Muzaffarpur",
+    "Darbhanga",
+    "Purnia",
+    "Saharsa",
+    "Siwan",
+    "Nalanda",
+  ],
+  Chandigarh: ["Chandigarh"],
+  "Chhattisgarh": [
+    "Raipur",
+    "Bilaspur",
+    "Korba",
+    "Raigarh",
+    "Durg",
+    "Jagdalpur",
+    "Ambikapur",
+  ],
+  "Dadra & Nagar Haveli": ["Silvassa"],
+  "Daman & Diu": ["Daman", "Diu"],
+  Delhi: ["Delhi"],
+  Goa: ["Panaji", "Margao", "Mapusa", "Vasco da Gama"],
+  Gujarat: [
+    "Ahmedabad",
+    "Surat",
+    "Vadodara",
+    "Rajkot",
+    "Bhavnagar",
+    "Junagadh",
+    "Anand",
+    "Nadiad",
+  ],
+  Haryana: [
+    "Chandigarh",
+    "Faridabad",
+    "Gurugram",
+    "Ambala",
+    "Rohtak",
+    "Hisar",
+    "Karnal",
+    "Panipat",
+  ],
+  "Himachal Pradesh": [
+    "Shimla",
+    "Dharamshala",
+    "Kullu",
+    "Solan",
+    "Mandi",
+    "Una",
+  ],
+  "Jammu & Kashmir": [
+    "Srinagar",
+    "Jammu",
+    "Baramulla",
+    "Anantnag",
+    "Pulwama",
+  ],
+  Jharkhand: [
+    "Ranchi",
+    "Jamshedpur",
+    "Dhanbad",
+    "Hazaribagh",
+    "Deoghar",
+    "Giridih",
+    "Bokaro",
+  ],
+  Karnataka: [
+    "Bengaluru",
+    "Mysuru",
+    "Hubballi",
+    "Mangaluru",
+    "Belagavi",
+    "Tumakuru",
+    "Davangere",
+  ],
+  Kerala: [
+    "Thiruvananthapuram",
+    "Kochi",
+    "Kozhikode",
+    "Kottayam",
+    "Thrissur",
+    "Malappuram",
+    "Palakkad",
+  ],
+  Lakshadweep: ["Kavaratti"],
+  "Madhya Pradesh": [
+    "Bhopal",
+    "Indore",
+    "Gwalior",
+    "Ujjain",
+    "Jabalpur",
+    "Sagar",
+    "Rewa",
+  ],
+  Maharashtra: [
+    "Mumbai",
+    "Pune",
+    "Nagpur",
+    "Aurangabad",
+    "Nashik",
+    "Solapur",
+    "Thane",
+    "Kolhapur",
+  ],
+  Manipur: ["Imphal"],
+  Meghalaya: ["Shillong", "Tura"],
+  Mizoram: ["Aizawl"],
+  Nagaland: ["Kohima", "Dimapur"],
+  Orissa: [
+    "Bhubaneswar",
+    "Cuttack",
+    "Berhampur",
+    "Sambalpur",
+    "Rourkela",
+  ],
+  Pondicherry: ["Puducherry", "Karaikal", "Mahe", "Yanam"],
+  Punjab: [
+    "Chandigarh",
+    "Amritsar",
+    "Ludhiana",
+    "Jalandhar",
+    "Patiala",
+    "Bathinda",
+    "Mohali",
+  ],
+  Rajasthan: [
+    "Jaipur",
+    "Udaipur",
+    "Jodhpur",
+    "Kota",
+    "Ajmer",
+    "Bikaner",
+    "Alwar",
+  ],
+  Sikkim: ["Gangtok"],
+  "Tamil Nadu": [
+    "Chennai",
+    "Coimbatore",
+    "Madurai",
+    "Trichy",
+    "Salem",
+    "Tirunelveli",
+    "Erode",
+  ],
+  Tripura: ["Agartala"],
+  "Uttar Pradesh": [
+    "Lucknow",
+    "Kanpur",
+    "Agra",
+    "Varanasi",
+    "Allahabad",
+    "Ghaziabad",
+    "Bareilly",
+    "Aligarh",
+  ],
+  Uttaranchal: [
+    "Dehradun",
+    "Nainital",
+    "Haridwar",
+    "Mussoorie",
+    "Rishikesh",
+  ],
+  "West Bengal": [
+    "Kolkata",
+    "Siliguri",
+    "Howrah",
+    "Durgapur",
+    "Asansol",
+    "Kharagpur",
+    "Murshidabad",
+  ],
+};
+
+  const stateSelect = document.getElementById("state");
+  Object.keys(stateCityMapping).forEach((state) => {
+    const option = document.createElement("option");
+    option.value = state;
+    option.textContent = state;
+    stateSelect.appendChild(option);
+  });
+
+  stateSelect.addEventListener("change", function () {
+    const citySelect = document.getElementById("city");
+    citySelect.innerHTML = '<option value="">Select a city</option>';
+    const selectedState = this.value;
+    if (selectedState && stateCityMapping[selectedState]) {
+      stateCityMapping[selectedState].forEach((city) => {
+        const option = document.createElement("option");
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+      });
+    }
+  });
+
+  
+  document.getElementById("inputMode").addEventListener("change", function () {
+    const mode = this.value;
+    document.getElementById("stateCityFields").style.display =
+      mode === "stateCity" ? "block" : "none";
+    document.getElementById("tempHumidityFields").style.display =
+      mode === "tempHumidity" ? "block" : "none";
+  });
+
+  
+  document
+    .getElementById("cropForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const inputMode = document.getElementById("inputMode").value;
+      const formData = {
+        nitrogen: parseFloat(document.getElementById("nitrogen").value),
+        phosphorous: parseFloat(document.getElementById("phosphorous").value),
+        potassium: parseFloat(document.getElementById("potassium").value),
+        ph: parseFloat(document.getElementById("ph").value),
+        rainfall: parseFloat(document.getElementById("rainfall").value),
+      };
+
+      if (inputMode === "stateCity") {
+        formData.city = document.getElementById("city").value;
+        formData.state = document.getElementById("state").value;
+      } else if (inputMode === "tempHumidity") {
+        formData.temperature = parseFloat(
+          document.getElementById("temperature").value
+        );
+        formData.humidity = parseFloat(
+          document.getElementById("humidity").value
+        );
+      }
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/recommend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          document.getElementById("recommendation").style.display = "block";
+          document.getElementById("recommendationText").innerHTML = `
+              Recommended Crop: <strong>${result.crop}</strong><br>
+              Predicted Yield: <strong>${result.predicted_yield} kg/ha</strong>
+          `;
+        } else {
+          alert(result.error || "An error occurred.");
+        }
+      } catch (error) {
+        alert("Failed to connect to the server. Please try again later.");
+      }
+    });
+</script>
